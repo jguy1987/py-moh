@@ -39,8 +39,6 @@ def run_player_task():
     :return:
     """
 
-    pygame.mixer.init()
-
     try:
         while True:
             if playback_should_stop():
@@ -74,7 +72,10 @@ def play_track(track):
     Play a single track using pygame.
     :param track: Track instance
     """
+    pygame.mixer.init()
     try:
+        pygame.mixer.quit()
+        pygame.mixer.init()
         # Before loading a new track, clean up the previous one.
         print(f"Playing track: {track.name}")
         pygame.mixer.music.load(track.file_upload.path)
