@@ -20,14 +20,17 @@ def home(request):
     default_now_playing = {
         'value': 'None',
     }
-    currently_playing, _ = System.objects.get_or_create(key='now_playing', defaults=default_now_playing)
-    # get the track name from the currently_playing value
-    now_playing_track = Tracks.objects.get(id=currently_playing.value)
+    currently_playing, create = System.objects.get_or_create(key='now_playing', defaults=default_now_playing)
+    if create or currently_playing.value == 'None':
+        now_playing_track = None
+    else:
+        # get the track name from the currently_playing value
+        now_playing_track = Tracks.objects.get(id=currently_playing.value).name
     return render(
         request,
         'home.html',
         {
             'loop_task': task_running,
-            'currently_playing': now_playing_track.name
+            'currently_playing': now_playing_track
         }
     )
