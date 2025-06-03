@@ -1,0 +1,18 @@
+Django has a method by which you can setup different environments with different settings.
+
+For example, we have a common settings, a dev settings, and a prod settings (prod doesn't exist yet)
+common.py is common to all installations and contains root level settings, like app declarations.
+In general, do not change anything in common.py
+dev.py contains development settings. it is a template for the prod.py
+
+To set this up, copy dev.py to prod.py, then change settings as appropriate in prod.py.
+Then, open asgi.py and wsgi.py and change the line
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'moh.settings.dev')
+
+to
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'moh.settings.prod')
+
+And save. Then, reboot your web server. Now, Django will be set to your prod settings and won't
+be overwritten by a main branch update.
