@@ -19,6 +19,13 @@ def playback_should_stop():
     else:
         return False
 
+
+def get_volume():
+    """Get the correct value of the volume of the playback"""
+    ret, _ = System.objects.get_or_create(key='volume', defaults={'value': '5'})
+    return int(ret.value)
+
+
 def clear_stop_flag():
     """Clear the stop flag to allow playback to resume."""
     defaults = {
@@ -59,6 +66,7 @@ def run_player_task():
                 if playback_should_stop():
                     pygame.mixer.quit()
                     return
+                pygame.mixer.music.set_volume(get_volume())
 
                 play_track(track)
     except Exception as e:

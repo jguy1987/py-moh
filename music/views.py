@@ -95,3 +95,7 @@ def stop_playback(request):
     music_loop.save()
     messages.error(request, 'Playback stopped!')
     return redirect('home')
+
+
+def set_volume(request, vol):
+    set_volume_task()
