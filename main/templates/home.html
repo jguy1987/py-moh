@@ -1,6 +1,19 @@
 {% extends "layout.html" %}
 
 {% block content %}
+    {% include 'alert.html' %}
     <h1>Music On-Hold</h1>
     <p>You can manage the music on hold system from this portal. Choose the appropriate menu at the top.</p>
+    <br />
+    <h3>Currently Playing Track:</h3>
+    {% if loop_task == 'False' %}
+        <span style="color: red; font-weight: bold;">The music has been stopped!</span>&nbsp;
+        <a href="{% url 'start_playback' %}" class="btn btn-success btn-sm"><i class="bi bi-play-circle"></i> Start Now!</a>
+    {% else %}
+        {{ currently_playing }}
+        <a href="{% url 'stop_playback' %}" class="btn btn-danger btn-sm"><i class="bi bi-stop-circle"></i> Stop Playback!</a>
+    {% endif %}
+    <br />
+    <a href="{% url 'stop_playback' %}" class="btn btn-warning btn-sm"><i class="bi bi-recycle"></i> Reset Playback</a>
+    <small>If the music is doing wonky things, this will force the playback to stop and reset all running & scheduled tasks.</small>
 {% endblock %}

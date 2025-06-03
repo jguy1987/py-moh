@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
+    'music',
+    'django_q'
 ]
 
 MIDDLEWARE = [
@@ -126,3 +128,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'orm': 'default',  # Use ORM broker
+    'workers': 4,
+    'timeout': 3600 * 24,
+    'retry': 3600 * 24,
+    'queue_limit': 50,
+    'bulk': 10,
+    'log_level': 'INFO',
+}
