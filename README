@@ -1,0 +1,89 @@
+# Py-MOH - Python Music on Hold
+
+Py-MOH is built as a "music on hold" system, but could be used as a system to loop endlessly through one or more
+audio files that you upload. Full management of the tracks available is done via a Django WebApp Simple GUI.
+
+This allows you to turn any device running a Linux OS into a Music On Hold system, even those that are headless.
+(Note: Only Debian 12 and Ubuntu 24.04 tested, and you have to install a GUI on both)
+
+The Django WebApp has full user control, so only authorized users can manage the tracks. Uses SQLite to manage tracks,
+users. Features full logging and uses django-Q2 to task the audio to loop.
+
+## Installation
+Installation/Deployment is rather simple:
+
+1. Install python, pip, ffmpeg, nginx on your distribution of choice
+2. Clone the repository into your home directory
+3. Copy moh/settings/dev.py into prod.py and make sure to edit the following settings:
+    - SECRET_KEY change it
+    - DEBUG: Set to False
+    - ALLOWED_HOSTS: a python list of hostnames able to connect.
+    - TIME_ZONE: Set to your ISO-8601 timezone (like mine is 'America/Chicago', so the logging is in the correct time.
+4. Create & activate a python virtual environment.
+5. Use pip to install gunicorn into your virtual env.
+6. Set gunicorn up as a service by creating a systemd file for gunicorn, make sure to change the appropriate fields
+(on Debian create in /etc/systemd/system/gunicorn.service):
+```
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=YOURUSER
+Group=www-data
+WorkingDirectory=/home/YOURUSER/PROJECT
+ExecStart=/path/to/gunicorn --access-logfile - --workers 3 --bind 127.0.0.1:8000 moh.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+```
+Gunicorn is typically installed into bin/gunicorn within your virtual environment.
+
+7. daemon reload, enable and start the gunicorn service.
+8. Setup a site within nginx (in Debian, create a file: /etc/nginx/sites-available/moh)
+```
+server {
+    listen 80;
+    server_name YOURDOMAIN;
+
+    location /static/ {
+	alias /var/www/staticfiles/;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+9. Enable the website by creating a link in sites-enabled: `ln -s /etc/nginx/sites-available/moh /etc/nginx/sites-enabled`
+10. (OPTIONAL BUT RECOKMMENDED) Up the limit of file you can upload by adding `client_max_body_size = 20M` to your
+nginx.conf. 20M is a max file size of 20 MB. Increase/decrease as needed.
+11. Create a service file for django-q, as you will need it to loop the task for the music player. In Debian, create
+/etc/systemd/system/django-q.service:
+```
+[Unit]
+Description=Django-Q Cluster
+After=network.target
+
+[Service]
+Type=simple
+User=YOURUSER
+Group=www-data
+WorkingDirectory=/home/YOURUSER/PROJECT
+ExecStart=/home/YOURUSER//venv/bin/python /home/YOURUSER/PROJECT/manage.py qcluster
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+12. daemon reload, activate and restart the django-q service, then restart the nginx and guncicorn services.
+13. Create an initial user so you can login and add more users:
+`python /path/to/moh/manage.py createsuperuser`
+Answer the questions.
+That should be it. You can now access the app at your URL of choice and login with the superuser you just created.
