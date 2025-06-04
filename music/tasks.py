@@ -2,10 +2,11 @@ import random
 import time
 import pygame
 from django_q.models import OrmQ
+import logging
 
 from main.models import System
 from music.models import Tracks
-import logging
+
 
 
 # Get logger
@@ -88,8 +89,12 @@ def play_track(track):
     """
     vol = get_volume()  # get the current volume
     logging.info(f"Using volume level {vol}")
+    pygame.mixer.init()
     try:
         # Before loading a new track, clean up the previous one.
+        pygame.mixer.quit()
+        pygame.mixer.init()
+        pygame.mixer.music.set_volume(vol)
         logging.info(f"Playing track: {track.name}")
         pygame.mixer.music.load(track.file_upload.path)
         pygame.mixer.music.play()
@@ -111,6 +116,10 @@ def play_track(track):
 
     except Exception as e:
         logging.error(f"Error playing track {track.name}: {e}")
+        if "initialized" in e:
+            pygame.mixer.quit()
+            logging.error("Mixer could not be initialized.")
+            return # quit gracefully.
     finally:
         pygame.mixer.quit()
 

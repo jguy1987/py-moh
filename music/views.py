@@ -4,7 +4,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import Http404, FileResponse, JsonResponse
+from django.http import Http404, FileResponse, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from pydub import AudioSegment
 
@@ -104,6 +104,7 @@ def set_volume(request, vol):
     volume.value = vol
     volume.save()
     logging.info(f"Set volume to {vol}")
+    return HttpResponse(f"Set volume to {vol}")
 
 
 def now_playing_refresh(request):
