@@ -29,20 +29,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'music_manage' %}">Music Management</a>
                 </li>
-            </ul>
-        </div>
-        <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="volumeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Volume
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="volumeDropdown">
-                {% for v in 10|generate_range %}
-                    <li>
-                        <a class="dropdown-item volume-setting" href="{% url 'set_volume' v %}" data-volume="{{ v }}">
-                            {{ v }}
-                        </a>
-                    </li>
-                {% endfor %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'stop_playback' %}">Reset System</a>
+                </li>
             </ul>
         </div>
     </div>

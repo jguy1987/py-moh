@@ -26,11 +26,15 @@ def home(request):
     else:
         # get the track name from the currently_playing value
         now_playing_track = Tracks.objects.get(id=currently_playing.value).name
+
+    # Get the current volume
+    volume, _ = System.objects.get_or_create(key='volume', defaults={'value': '5'})
     return render(
         request,
         'home.html',
         {
             'loop_task': task_running,
-            'currently_playing': now_playing_track
+            'currently_playing': now_playing_track,
+            'current_volume': int(volume.value),
         }
     )

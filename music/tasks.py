@@ -27,7 +27,7 @@ def playback_should_stop():
 def get_volume():
     """Get the correct value of the volume of the playback"""
     ret, _ = System.objects.get_or_create(key='volume', defaults={'value': '5'})
-    return int(ret.value)
+    return int(ret.value) / 10.0
 
 
 def clear_stop_flag():
@@ -50,6 +50,7 @@ def run_player_task():
     :return:
     """
     logging.info('Player Started.')
+    pygame.mixer.init()
     try:
         while True:
             if playback_should_stop():
@@ -73,8 +74,6 @@ def run_player_task():
                     pygame.mixer.quit()
                     logging.info("Playback should stop. Stopping.")
                     return
-                pygame.mixer.music.set_volume(get_volume())
-
                 play_track(track)
     except Exception as e:
         logging.error(f"Error running player task: {e}")
@@ -87,11 +86,9 @@ def play_track(track):
     Play a single track using pygame.
     :param track: Track instance
     """
-    pygame.mixer.init()
-    logging.info("Player initialized.")
+    vol = get_volume()  # get the current volume
+    logging.info(f"Using volume level {vol}")
     try:
-        pygame.mixer.quit()
-        pygame.mixer.init()
         # Before loading a new track, clean up the previous one.
         logging.info(f"Playing track: {track.name}")
         pygame.mixer.music.load(track.file_upload.path)
@@ -107,6 +104,9 @@ def play_track(track):
             if playback_should_stop():
                 pygame.mixer.music.stop()
                 return  # Stop immediately if playback is flagged
+            if vol != get_volume():
+                logging.info("Volume changing to level {get_volume()}")
+                pygame.mixer.music.set_volume(get_volume())
             time.sleep(1)
 
     except Exception as e:

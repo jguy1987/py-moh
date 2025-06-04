@@ -1,19 +1,84 @@
 {% extends "layout.html" %}
+{% load custom_filters %}
+
+{% block extra_head %}
+    <style>
+        .volume-bar-btn {
+          width: 10px;
+          height: 15px;
+          background-color: #ccc;
+          margin: 0 2px;
+          cursor: pointer;
+        }
+        .volume-bar-btn.active {
+            background-color: #0d6efd;
+        }
+  </style>
+{% endblock %}
 
 {% block content %}
     {% include 'alert.html' %}
     <h1>Music On-Hold</h1>
     <p>You can manage the music on hold system from this portal. Choose the appropriate menu at the top.</p>
     <br />
-    <h3>Currently Playing Track:</h3>
-    {% if loop_task == 'False' %}
-        <span style="color: red; font-weight: bold;">The music has been stopped!</span>&nbsp;
-        <a href="{% url 'start_playback' %}" class="btn btn-success btn-sm"><i class="bi bi-play-circle"></i> Start Now!</a>
-    {% else %}
-        {{ currently_playing }}
-        <a href="{% url 'stop_playback' %}" class="btn btn-danger btn-sm"><i class="bi bi-stop-circle"></i> Stop Playback!</a>
-    {% endif %}
-    <br />
-    <a href="{% url 'stop_playback' %}" class="btn btn-warning btn-sm"><i class="bi bi-recycle"></i> Reset Playback</a>
-    <small>If the music is doing wonky things, this will force the playback to stop and reset all running & scheduled tasks.</small>
+    <div class="card text-dark">
+        <div class="card-body">
+            <h5 class="card-title">Now Playing</h5>
+            <p id="current-track" class="card-text">
+                {% if loop_task == 'False' %}
+                    No Track Playing
+                {% else %}
+                    {{ currently_playing }}
+                {% endif %}
+            </p>
+            <div class="d-flex align-items-center gap-3">
+                <a id="play-btn" href="{% url 'start_playback' %}" class="btn btn-success"
+                   {% if loop_task != 'False' %}disabled{% endif %}>
+                    <i class="bi bi-play-fill"></i>
+                </a>
+                <a id="stop-btn" href="{% url 'stop_playback' %}" class="btn btn-danger"
+                   {% if loop_task == 'False' %}disabled{% endif %}>
+                    <i class="bi bi-stop-fill"></i>
+                </a>
+                <div class="d-flex align-items-center ms-auto">
+                    <span class="me-2">Volume:</span>
+                    <div id="volume-control" class="d-flex">
+                        {% for i in 10|generate_range %}
+                            <button class="volume-bar-btn {% if current_volume >= i %}active{% endif %}" data-level="{{ i }}"></button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+    // Volume control logic with Django integration
+    document.querySelectorAll('.volume-bar-btn').forEach(bar => {
+      bar.addEventListener('click', () => {
+        const level = parseInt(bar.dataset.level);
+        document.querySelectorAll('.volume-bar-btn').forEach(b => {
+          b.classList.toggle('active', parseInt(b.dataset.level) <= level);
+        });
+
+        // Call Django view to set volume
+        fetch(`/music/set_volume/${level}`, {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            console.log('Volume set to', level);
+          }
+        })
+        .catch(error => console.error('Error setting volume:', error));
+      });
+    });
+    </script>
 {% endblock %}

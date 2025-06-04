@@ -1,4 +1,6 @@
 import os
+import logging
+
 
 from django.conf import settings
 from django.contrib import messages
@@ -101,5 +103,4 @@ def set_volume(request, vol):
     volume = System.objects.get(key='volume')
     volume.value = vol
     volume.save()
-    messages.success(request, f"The volume has been set to level {vol}. The change will be reflected in the output soon.")
-    return redirect('home')
+    logging.info(f"Set volume to {vol}")
