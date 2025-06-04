@@ -1,5 +1,4 @@
-
-# from django.contrib import admin
+from django.contrib import admin
 from django.urls import path
 from main import views as main_view
 from music import views as music_view
@@ -16,5 +15,8 @@ urlpatterns = [
     path('music/set_volume/<int:vol>', music_view.set_volume, name='set_volume'),
     path('now_playing_refresh/', music_view.now_playing_refresh, name='now_playing_refresh'),
 
-    #    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('accounts/login/', main_view.login),
+    path('login/', main_view.login, name='login'),
+    path('logout/', main_view.logout, name='logout'),
 ]

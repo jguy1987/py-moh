@@ -1,13 +1,13 @@
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.urls import reverse
 
-import music
 from main.models import System
 from music.models import Tracks
 
 from music import tasks as music_tasks
 
-
+@login_required
 def home(request):
     default_system = {
         'value': 'False',
@@ -40,3 +40,19 @@ def home(request):
         }
     )
 
+
+def login(request):
+    # Displays admin login page, with a redirect to the home page
+    redirect_url = reverse('home')  # Replace with your target URL
+    login_url = reverse('admin:login')  # Reverse-resolves the admin login URL
+    return redirect(f"{login_url}?next={redirect_url}")
+
+
+
+@login_required
+def logout(request):
+    from django.contrib.auth import logout
+
+    # Logs the user out.
+    logout(request)
+    return redirect('login')

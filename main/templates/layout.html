@@ -32,6 +32,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'stop_playback' %}">Reset System</a>
                 </li>
+                {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
             </ul>
         </div>
     </div>

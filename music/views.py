@@ -4,6 +4,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import Http404, FileResponse, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from pydub import AudioSegment
@@ -14,6 +15,7 @@ from music.models import Tracks
 from music.tasks import start_playback_task, stop_playback_task, check_music_task
 
 
+@login_required
 def manage(request):
     # view of the music tracks currently in the system.
     music = Tracks.objects.all()
@@ -26,6 +28,7 @@ def manage(request):
     )
 
 
+@login_required
 def add(request):
     if request.method == 'POST':
         form = TrackForm(request.POST, request.FILES)
@@ -47,14 +50,17 @@ def add(request):
     )
 
 
+@login_required
 def edit(request):
     return None
 
 
+@login_required
 def delete(request):
     return None
 
 
+@login_required
 def preview_track(request, track_id):
     try:
         track = Tracks.objects.get(id=track_id)
@@ -80,6 +86,7 @@ def preview_track(request, track_id):
     return FileResponse(open(temp_file_path, "rb"), content_type="audio/mpeg")
 
 
+@login_required
 def start_playback(request):
     """Start the playback task."""
     start_playback_task()
@@ -87,6 +94,7 @@ def start_playback(request):
     return redirect('home')
 
 
+@login_required
 def stop_playback(request):
     """Stop the playback task."""
     stop_playback_task()
@@ -98,6 +106,7 @@ def stop_playback(request):
     return redirect('home')
 
 
+@login_required
 def set_volume(request, vol):
     # This will set the volume and redirect to the home screen.
     volume = System.objects.get(key='volume')
@@ -107,6 +116,7 @@ def set_volume(request, vol):
     return HttpResponse(f"Set volume to {vol}")
 
 
+@login_required
 def now_playing_refresh(request):
     # This is an AJAX call from the front page that triggers once every 10 seconds. It will
     # refresh the information about what is now playing and the volume level, in the event the track
