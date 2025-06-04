@@ -83,6 +83,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django-q2 configuration
+
 Q_CLUSTER = {
     'name': 'DjangORM',
     'orm': 'default',  # Use ORM broker
@@ -92,4 +94,32 @@ Q_CLUSTER = {
     'queue_limit': 50,
     'bulk': 10,
     'log_level': 'INFO',
+}
+
+
+# Django Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'moh.log',
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        '': {  # Root logger
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
 }

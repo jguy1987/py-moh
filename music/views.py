@@ -80,7 +80,6 @@ def preview_track(request, track_id):
 
 def start_playback(request):
     """Start the playback task."""
-    # Store the ID of the task so that we can recall it for status displays, just in case the task crashes.
     start_playback_task()
     messages.success(request, 'Playback started!')
     return redirect('home')
@@ -98,4 +97,9 @@ def stop_playback(request):
 
 
 def set_volume(request, vol):
-    set_volume_task()
+    # This will set the volume and redirect to the home screen.
+    volume = System.objects.get(key='volume')
+    volume.value = vol
+    volume.save()
+    messages.success(request, f"The volume has been set to level {vol}. The change will be reflected in the output soon.")
+    return redirect('home')

@@ -5,7 +5,11 @@ from django_q.models import OrmQ
 
 from main.models import System
 from music.models import Tracks
-from django.utils.timezone import now
+import logging
+
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 
 def playback_should_stop():
@@ -45,7 +49,7 @@ def run_player_task():
     Task to run an indefinite background loop for shuffling and playing active tracks.
     :return:
     """
-
+    logging.info('Player Started.')
     try:
         while True:
             if playback_should_stop():
@@ -56,8 +60,10 @@ def run_player_task():
                 active=True,
             ).order_by('?')  # Shuffle tracks
 
+            logger.info('Playlist generated.')
+
             if not active_tracks.exists():
-                print("No active tracks to play. Waiting...")
+                logger.info("No active tracks to play. Waiting...")
                 time.sleep(10)  # Wait before checking again
                 continue
 
@@ -65,12 +71,13 @@ def run_player_task():
             for track in active_tracks:
                 if playback_should_stop():
                     pygame.mixer.quit()
+                    logging.info("Playback should stop. Stopping.")
                     return
                 pygame.mixer.music.set_volume(get_volume())
 
                 play_track(track)
     except Exception as e:
-        print(f"Error running player task: {e}")
+        logging.error(f"Error running player task: {e}")
     finally:
         pygame.mixer.quit()
 
@@ -81,11 +88,12 @@ def play_track(track):
     :param track: Track instance
     """
     pygame.mixer.init()
+    logging.info("Player initialized.")
     try:
         pygame.mixer.quit()
         pygame.mixer.init()
         # Before loading a new track, clean up the previous one.
-        print(f"Playing track: {track.name}")
+        logging.info(f"Playing track: {track.name}")
         pygame.mixer.music.load(track.file_upload.path)
         pygame.mixer.music.play()
 
@@ -102,7 +110,7 @@ def play_track(track):
             time.sleep(1)
 
     except Exception as e:
-        print(f"Error playing track {track.name}: {e}")
+        logging.error(f"Error playing track {track.name}: {e}")
     finally:
         pygame.mixer.quit()
 
