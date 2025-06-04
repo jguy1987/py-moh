@@ -13,6 +13,8 @@ urlpatterns = [
     path('preview/<int:track_id>/', music_view.preview_track, name='preview_track'),
     path('music/start', music_view.start_playback, name='start_playback'),
     path('music/stop', music_view.stop_playback, name='stop_playback'),
-    path('music/set_volume/<int:vol>', music_view.set_volume, name='set_volume')
+    path('music/set_volume/<int:vol>', music_view.set_volume, name='set_volume'),
+    path('now_playing_refresh/', music_view.now_playing_refresh, name='now_playing_refresh'),
+
     #    path('admin/', admin.site.urls),
 ]

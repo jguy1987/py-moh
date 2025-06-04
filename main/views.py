@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 
 import music
@@ -22,7 +23,7 @@ def home(request):
     }
     currently_playing, create = System.objects.get_or_create(key='now_playing', defaults=default_now_playing)
     if create or currently_playing.value == 'None':
-        now_playing_track = None
+        now_playing_track = 'No Track Playing'
     else:
         # get the track name from the currently_playing value
         now_playing_track = Tracks.objects.get(id=currently_playing.value).name
@@ -38,3 +39,4 @@ def home(request):
             'current_volume': int(volume.value),
         }
     )
+

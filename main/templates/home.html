@@ -25,11 +25,7 @@
         <div class="card-body">
             <h5 class="card-title">Now Playing</h5>
             <p id="current-track" class="card-text">
-                {% if loop_task == 'False' %}
-                    No Track Playing
-                {% else %}
-                    {{ currently_playing }}
-                {% endif %}
+                {{ currently_playing }}
             </p>
             <div class="d-flex align-items-center gap-3">
                 <a id="play-btn" href="{% url 'start_playback' %}" class="btn btn-success"
@@ -81,4 +77,57 @@
       });
     });
     </script>
+    <script>
+        // Volume control logic (existing code)
+        document.querySelectorAll('.volume-bar-btn').forEach(bar => {
+          // ... (keep your existing volume control code) ...
+        });
+
+        // Function to update the UI with new data
+        function updateUI(data) {
+            // Update now playing text
+            document.getElementById('current-track').textContent = data.now_playing;
+
+            // Update play/stop buttons
+            const playBtn = document.getElementById('play-btn');
+            const stopBtn = document.getElementById('stop-btn');
+
+            if (data.is_playing) {
+                playBtn.setAttribute('disabled', 'disabled');
+                stopBtn.removeAttribute('disabled');
+            } else {
+                playBtn.removeAttribute('disabled');
+                stopBtn.setAttribute('disabled', 'disabled');
+            }
+
+            // Update volume bars
+            document.querySelectorAll('.volume-bar-btn').forEach(bar => {
+                const level = parseInt(bar.dataset.level);
+                bar.classList.toggle('active', data.volume >= level);
+            });
+        }
+
+        // Function to refresh data
+        function refreshData() {
+            fetch('{% url "now_playing_refresh" %}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateUI(data);
+            })
+            .catch(error => console.error('Error refreshing data:', error));
+        }
+
+        // Refresh every 10 seconds
+        setInterval(refreshData, 10000);
+
+        // Also refresh immediately when the page loads
+        document.addEventListener('DOMContentLoaded', refreshData);
+    </script>
+
 {% endblock %}

@@ -11,7 +11,7 @@ from pydub import AudioSegment
 from main.models import System
 from music.forms import TrackForm
 from music.models import Tracks
-from music.tasks import start_playback_task, stop_playback_task
+from music.tasks import start_playback_task, stop_playback_task, check_music_task
 
 
 def manage(request):
@@ -104,3 +104,31 @@ def set_volume(request, vol):
     volume.value = vol
     volume.save()
     logging.info(f"Set volume to {vol}")
+
+
+def now_playing_refresh(request):
+    # This is an AJAX call from the front page that triggers once every 10 seconds. It will
+    # refresh the information about what is now playing and the volume level, in the event the track
+    # changes, or the volume is changed by another user.
+
+    # Get the current track.
+    currently_playing, _ = System.objects.get_or_create(key='now_playing', defaults={'value': 'None'})
+
+    # Check if music is playing
+    loop_task, _ = System.objects.get_or_create(key='music_loop_task', defaults={'value': 'False'})
+    is_playing = check_music_task(loop_task.value)
+
+    # Get Track Name if playing
+    if is_playing and currently_playing != 'None':
+        now_playing_track = Tracks.objects.get(id=currently_playing.value).name
+    else:
+        now_playing_track = 'No Track Playing'
+
+    # Get current volume level
+    volume, _ = System.objects.get_or_create(key='volume', defaults={'value': '5'})
+
+    return JsonResponse({
+        'now_playing': now_playing_track,
+        'volume': int(volume.value),
+        'is_playing': is_playing
+    })
