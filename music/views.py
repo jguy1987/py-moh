@@ -56,8 +56,18 @@ def edit(request):
 
 
 @login_required
-def delete(request):
-    return None
+def delete(request, track_id):
+    """
+    Delete a track
+    :param request:
+    :param track_id: The ID of the track to delete
+    :return:
+    """
+    track = Tracks.objects.get(id=track_id)
+    track_name = track.name
+    track.delete()
+    messages.success(request, f'Track {track_name} deleted successfully!')
+    return redirect('music_manage')
 
 
 @login_required
