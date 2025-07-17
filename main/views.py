@@ -22,7 +22,7 @@ def home(request):
         'value': 'None',
     }
     currently_playing, create = System.objects.get_or_create(key='now_playing', defaults=default_now_playing)
-    if create or currently_playing.value == 'None':
+    if create or currently_playing.value == 'None' or task_running == 'False':
         now_playing_track = 'No Track Playing'
     else:
         # get the track name from the currently_playing value
